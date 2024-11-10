@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify, redirect, url_for
+from flask import (Flask, render_template, request, jsonify,
+                   redirect, url_for)
 from sqlalchemy.orm import joinedload
 from datamanager import User, SQLiteDataManager
 
@@ -24,12 +25,10 @@ def list_users():
     Get a list of all users in the database.
 
     Returns:
-        JSON: A list of all users.
+        HTML: A list of all users.
     """
     users = data_manager.get_all_users()
-    users_list = [{"id": user.id, "name": user.name} for user in
-                  users]
-    return jsonify(users_list)
+    return render_template('users.html', users=users)
 
 
 @app.route('/users/<int:user_id>', methods=['GET'])
