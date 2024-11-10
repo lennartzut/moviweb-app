@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, \
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker, scoped_session, \
     relationship, declarative_base
-from data_manager_interface import DataManagerInterface
+from datamanager import DataManagerInterface
 
 Base = declarative_base()
 
