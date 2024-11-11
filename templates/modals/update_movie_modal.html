@@ -1,0 +1,37 @@
+<div class="modal fade" id="updateMovieModal-{{ movie.id }}" tabindex="-1" role="dialog" aria-labelledby="updateMovieModalLabel-{{ movie.id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateMovieModalLabel-{{ movie.id }}">Update Movie</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('update_movie', user_id=user.id, movie_id=movie.id) }}">
+                    <div class="form-group">
+                        <label for="title-{{ movie.id }}">Title</label>
+                        <input type="text" class="form-control" id="title-{{ movie.id }}" name="title" value="{{ movie.name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="director-{{ movie.id }}">Director</label>
+                        <input type="text" class="form-control" id="director-{{ movie.id }}" name="director" value="{{ movie.director }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="year-{{ movie.id }}">Year</label>
+                        <input type="number" class="form-control" id="year-{{ movie.id }}" name="year" value="{{ movie.year }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="rating-{{ movie.id }}">Rating</label>
+                        <!-- Use input type="text" to accept float values -->
+                        <input type="text" class="form-control" id="rating-{{ movie.id }}" name="rating" value="{{ '{:.1f}'.format(movie.rating) }}" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Update Movie</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

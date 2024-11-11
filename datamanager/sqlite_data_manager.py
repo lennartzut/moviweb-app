@@ -34,6 +34,7 @@ class Movie(Base):
         year (int): The year the movie was released.
         rating (float): The rating of the movie.
         user_id (int): The ID of the user who added the movie.
+        imdb_id (str): The IMDb ID of the movie for fetching the poster.
     """
     __tablename__ = 'movies'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -42,6 +43,7 @@ class Movie(Base):
     year = Column(Integer, nullable=False)
     rating = Column(Float)
     user_id = Column(Integer, ForeignKey('users.id'))
+    imdb_id = Column(String, nullable=False)
     user = relationship("User", back_populates="movies")
 
 
@@ -113,7 +115,8 @@ class SQLiteDataManager(DataManagerInterface):
             print(f"Error adding user: {e}")
             session.rollback()
 
-    def add_movie(self, user_id, title, director, year, rating):
+    def add_movie(self, user_id, title, director, year, rating,
+                  imdb_id):
         """
         Add a new movie to the database for a specific user.
 
@@ -123,18 +126,27 @@ class SQLiteDataManager(DataManagerInterface):
             director (str): The director of the movie.
             year (int): The year the movie was released.
             rating (float): The rating of the movie.
+            imdb_id (str): The IMDb ID of the movie for fetching the poster.
         """
+        session = self.Session()
         try:
-            session = self.Session()
-            new_movie = Movie(name=title, director=director,
-                              year=year, rating=rating,
-                              user_id=user_id)
+            formatted_title = title.title()
+
+            new_movie = Movie(
+                name=formatted_title,
+                director=director,
+                year=year,
+                rating=rating,
+                user_id=user_id,
+                imdb_id=imdb_id
+            )
             session.add(new_movie)
             session.commit()
-            session.close()
-        except SQLAlchemyError as e:
+        except Exception as e:
             print(f"Error adding movie: {e}")
             session.rollback()
+        finally:
+            session.close()
 
     def update_movie(self, movie_id, title=None, director=None,
                      year=None, rating=None):
