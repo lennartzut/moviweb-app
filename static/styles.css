@@ -1,45 +1,33 @@
 /* General styles for the MoviWeb App */
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: #f8f9fa;
-    color: #343a40;
+    background-color: #343a40;
+    color: #ffffff;
     margin: 0;
     padding: 0;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
-header, footer {
+header, .main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
     text-align: center;
-    background-color: #343a40;
+}
+
+/* Button styles */
+.btn-primary, .btn-secondary, .btn-danger, .btn-warning, .btn-outline-light {
+    border: none;
+    box-shadow: none;
+    margin: 10px;
     color: #ffffff;
-    padding: 20px 0;
-}
-
-header h1, footer small {
-    margin: 0;
-}
-
-.container {
-    margin-top: 20px;
-    max-width: 1000px;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-}
-
-@media (max-width: 768px) {
-    .container {
-        max-width: 95%;
-        padding: 0 1rem;
-    }
 }
 
 .btn-primary {
     background-color: #6c757d;
-    border: none;
-    box-shadow: none;
-    margin: 10px;
 }
 
 .btn-primary:hover {
@@ -48,9 +36,6 @@ header h1, footer small {
 
 .btn-secondary {
     background-color: #adb5bd;
-    border: none;
-    box-shadow: none;
-    margin: 10px;
 }
 
 .btn-secondary:hover {
@@ -58,76 +43,151 @@ header h1, footer small {
 }
 
 .btn-danger {
-    background-color: #d9534f;
-    border: none;
-    box-shadow: none;
-    margin: 10px;
+    background-color: #ff6f61;
 }
 
 .btn-danger:hover {
-    background-color: #c9302c;
+    background-color: #e65c53;
 }
 
+.btn-warning {
+    background-color: #f0ad4e;
+}
+
+.btn-warning:hover {
+    background-color: #ec971f;
+}
+
+.btn-outline-light {
+    border-color: #ffffff;
+    color: #ffffff;
+}
+
+.btn-outline-light:hover {
+    background-color: #ffffff;
+    color: #343a40;
+}
+
+/* Flash messages */
 .alert {
     font-size: 1rem;
     padding: 12px 20px;
     border-radius: 4px;
     border: none;
+    color: #ffffff;
 }
 
+.alert-success {
+    background-color: #28a745;  /* Greenish color for success messages */
+    color: #ffffff;
+}
+
+.alert-danger {
+    background-color: #dc3545;  /* Reddish color for danger messages */
+    color: #ffffff;
+}
+
+.alert-error, .alert-warning {
+    background-color: #ff7043;  /* Default orange for error and warning */
+    color: #ffffff;
+}
+
+/* Modal content */
 .modal-content {
-    background-color: #ffffff;
+    background-color: #1f1f1f;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
 .modal-header, .modal-footer {
     border: none;
 }
 
+/* Movie cards */
 .card {
     border: none;
     border-radius: 12px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     width: 100%;
     height: 100%;
-    background-color: #ffffff;
+    overflow: hidden;
+    position: relative;
+    background-color: transparent; /* Removed background color */
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.75);
 }
 
-.card-body {
-    text-align: center;
-    padding: 10px;
+.card-img-container {
+    height: 100%;
+    overflow: hidden;
+}
+
+.card-img-top {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease-in-out;
+    border-radius: 12px;  /* To match the rounded corners of the card */
+}
+
+.card:hover .card-img-top {
+    transform: scale(1.1);  /* Slight zoom effect on hover */
+}
+
+.card-info {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(52, 52, 52, 0.9);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.card:hover .card-info {
+    opacity: 1;
 }
 
 .card-title {
     font-size: 1.1rem;
     font-weight: 600;
-    margin: 0.5rem 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin: 0.5rem auto;
+    color: #ffffff;
+    text-align: center;
+    max-width: 90%;
+    word-wrap: break-word;
 }
 
 .card-text {
     font-size: 0.9rem;
-    color: #6c757d;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: #adb5bd;
+    margin-bottom: 1rem;
 }
 
-.card-img-top {
-    height: 200px;
-    object-fit: cover;
-    object-position: center;
+.card-info-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: auto;
 }
 
+.card-info-buttons button {
+    flex: 1;
+    margin: 5px;
+}
+
+/* Row styling */
 .row {
     display: flex;
     flex-wrap: wrap;
@@ -135,35 +195,36 @@ header h1, footer small {
     margin: 0;
 }
 
-.col-md-4 {
+.col-md-3 {
     flex: 0 0 calc(25% - 1rem);
     max-width: calc(25% - 1rem);
     margin-bottom: 1rem;
 }
 
 @media (max-width: 992px) {
-    .col-md-4 {
+    .col-md-3 {
         flex: 0 0 calc(33.333% - 1rem);
         max-width: calc(33.333% - 1rem);
     }
 }
 
 @media (max-width: 768px) {
-    .col-md-4 {
+    .col-md-3 {
         flex: 0 0 calc(50% - 1rem);
         max-width: calc(50% - 1rem);
     }
 }
 
 @media (max-width: 576px) {
-    .col-md-4 {
+    .col-md-3 {
         flex: 0 0 100%;
         max-width: 100%;
     }
 }
 
+/* List styling for users and movie list */
 .list-group {
-    max-width: 600px;
+    max-width: 400px;
     margin: 20px auto;
     text-align: center;
 }
@@ -175,25 +236,24 @@ header h1, footer small {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background-color: transparent;
+    color: #e0e0e0;  /* Lightened the user name color for better readability */
+    font-weight: 600;
+}
+
+.list-group-item a {
+    color: #f8f9fa;  /* Brighter color for improved contrast */
+    font-weight: 700;
+}
+
+.list-group-item a:hover {
+    color: #adb5bd;
 }
 
 h2, h1, p {
     text-align: center;
     margin-bottom: 20px;
-}
-
-a {
-    color: #6c757d;
-    text-decoration: none;
-}
-
-a:hover {
-    color: #5a6268;
-    text-decoration: underline;
-}
-
-button.close, .modal-footer button {
-    box-shadow: none;
+    color: #ffffff;
 }
 
 .sorting-and-actions {
@@ -202,21 +262,4 @@ button.close, .modal-footer button {
     flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 20px;
-}
-
-#sort-movies {
-    min-width: 150px;
-    padding: 5px 10px;
-}
-
-@media (max-width: 768px) {
-    .sorting-and-actions {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    #sort-movies {
-        width: 100%;
-        margin-top: 10px;
-    }
 }
