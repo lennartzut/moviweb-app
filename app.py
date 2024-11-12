@@ -99,23 +99,50 @@ def delete_user(user_id):
 @app.route('/users/<int:user_id>', methods=['GET'])
 def user_movies(user_id):
     """
-    Display movies for a specific user.
+    Get all movies for a specific user with optional sorting.
 
     Args:
-        user_id (int): User's ID.
+        user_id (int): The ID of the user whose movies are to be retrieved.
 
     Returns:
-        str: HTML page with user movies or error.
+        Rendered HTML page with the list of movies for the specified user.
     """
     session = data_manager.Session()
+    sort = request.args.get('sort', 'name_asc')
+
     try:
         user = session.query(User).options(
-            joinedload(User.movies)).filter(User.id == user_id).first()
+            joinedload(User.movies)).filter(
+            User.id == user_id).first()
         if not user:
             return render_template('error.html',
                                    message="User not found"), 404
+
+        if sort == 'name_asc':
+            movies = sorted(user.movies,
+                            key=lambda m: m.name.lower())
+        elif sort == 'name_desc':
+            movies = sorted(user.movies,
+                            key=lambda m: m.name.lower(),
+                            reverse=True)
+        elif sort == 'year_asc':
+            movies = sorted(user.movies, key=lambda m: m.year)
+        elif sort == 'year_desc':
+            movies = sorted(user.movies, key=lambda m: m.year,
+                            reverse=True)
+        elif sort == 'rating_asc':
+            movies = sorted(user.movies,
+                            key=lambda m: (m.rating or 0))
+        elif sort == 'rating_desc':
+            movies = sorted(user.movies,
+                            key=lambda m: (m.rating or 0),
+                            reverse=True)
+        else:
+            movies = user.movies
+
         return render_template('user_movies.html', user=user,
-                               movies=user.movies, api_key=API_KEY)
+                               movies=movies, api_key=API_KEY,
+                               sort=sort)
     finally:
         session.close()
 

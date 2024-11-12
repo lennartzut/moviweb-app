@@ -7,10 +7,8 @@ body {
     padding: 0;
 }
 
-/* Import Google Fonts for improved readability */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
-/* Header and footer styling */
 header, footer {
     text-align: center;
     background-color: #343a40;
@@ -22,7 +20,6 @@ header h1, footer small {
     margin: 0;
 }
 
-/* Container to center-align content */
 .container {
     margin-top: 20px;
     max-width: 1000px;
@@ -38,7 +35,6 @@ header h1, footer small {
     }
 }
 
-/* Button styles */
 .btn-primary {
     background-color: #6c757d;
     border: none;
@@ -72,7 +68,6 @@ header h1, footer small {
     background-color: #c9302c;
 }
 
-/* Flash message styles */
 .alert {
     font-size: 1rem;
     padding: 12px 20px;
@@ -80,7 +75,6 @@ header h1, footer small {
     border: none;
 }
 
-/* Modal styles */
 .modal-content {
     background-color: #ffffff;
     border-radius: 8px;
@@ -91,13 +85,13 @@ header h1, footer small {
     border: none;
 }
 
-/* Cards for movies */
 .card {
     border: none;
     border-radius: 12px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    max-width: 100%;
+    width: 100%;
+    height: 100%;
     background-color: #ffffff;
 }
 
@@ -115,14 +109,25 @@ header h1, footer small {
     font-size: 1.1rem;
     font-weight: 600;
     margin: 0.5rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .card-text {
     font-size: 0.9rem;
     color: #6c757d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* Adjust the row styling for displaying movies */
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+    object-position: center;
+}
+
 .row {
     display: flex;
     flex-wrap: wrap;
@@ -157,7 +162,6 @@ header h1, footer small {
     }
 }
 
-/* User list and movie list styling - centrally aligned */
 .list-group {
     max-width: 600px;
     margin: 20px auto;
@@ -173,13 +177,11 @@ header h1, footer small {
     align-items: center;
 }
 
-/* Header, title, and button alignment */
 h2, h1, p {
     text-align: center;
     margin-bottom: 20px;
 }
 
-/* Header and footer links */
 a {
     color: #6c757d;
     text-decoration: none;
@@ -190,7 +192,31 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Remove borders from modal buttons */
 button.close, .modal-footer button {
     box-shadow: none;
+}
+
+.sorting-and-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#sort-movies {
+    min-width: 150px;
+    padding: 5px 10px;
+}
+
+@media (max-width: 768px) {
+    .sorting-and-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #sort-movies {
+        width: 100%;
+        margin-top: 10px;
+    }
 }
