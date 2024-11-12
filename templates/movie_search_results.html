@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - MoviWeb App</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body style="background-color: #343a40;">
+    <div class="container mt-5" style="max-width: 800px;">
+        <h2 class="text-center text-light mb-4">Search Results for "{{ search_query }}"</h2>
+
+        {% if search_results %}
+        <ul class="list-group">
+            {% for movie in search_results %}
+            <li class="list-group-item d-flex justify-content-between align-items-center bg-dark text-light mb-3 p-3 rounded">
+                <div class="text-left flex-grow-1">
+                    <strong>{{ movie.Title }}</strong> ({{ movie.Year }})<br>
+                    <small class="text-muted">{{ movie.Type.capitalize() }}</small>
+                </div>
+                <div class="ml-4">
+                    <form method="POST" action="{{ url_for('confirm_add_movie', user_id=user_id) }}">
+                        <input type="hidden" name="imdb_id" value="{{ movie.imdbID }}">
+                        <button type="submit" class="btn btn-primary btn-sm px-4">Add</button>
+                    </form>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-center text-warning mt-4">No results found for "{{ search_query }}".</p>
+        {% endif %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

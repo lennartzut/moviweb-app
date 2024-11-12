@@ -49,16 +49,15 @@ def add_user():
         flash("Name is required to add a user.", "danger")
         return redirect(url_for('list_users'))
 
-    # Check if the user already exists
     session = data_manager.Session()
     try:
-        existing_user = session.query(User).filter(User.name.ilike(user_name)).first()
+        existing_user = session.query(User).filter(
+            User.name.ilike(user_name)).first()
         if existing_user:
             flash(f"User '{user_name}' already exists. Please "
                   f"choose a different name.", "danger")
             return redirect(url_for('list_users'))
 
-        # Add new user
         data_manager.add_user(user_name)
         flash(f"User '{user_name}' added successfully.", "success")
         return redirect(url_for('list_users'))
@@ -88,7 +87,7 @@ def delete_user(user_id):
         session.commit()
         flash(f"User '{user.name}' deleted successfully.", "success")
     except Exception as e:
-        flash(f"An error occurred while trying to delete user: {e}", "danger")
+        flash(f"An error occurred: {e}", "danger")
         session.rollback()
     finally:
         session.close()
@@ -98,15 +97,25 @@ def delete_user(user_id):
 
 @app.route('/users/<int:user_id>', methods=['GET'])
 def user_movies(user_id):
+    """
+    Display movies of a specific user, with optional sorting
+    and search.
+
+    Args:
+        user_id (int): The ID of the user whose movies are
+        to be retrieved.
+
+    Returns:
+        str: Rendered HTML page with the list of movies for
+        the specified user.
+    """
     session = data_manager.Session()
     sort = request.args.get('sort', 'name_asc')
     search_query = request.args.get('search', '').strip().lower()
 
     try:
-        user = (session.query(User)
-                .options(joinedload(User.movies))
-                .filter(User.id == user_id)
-                .first())
+        user = session.query(User).options(
+            joinedload(User.movies)).filter(User.id == user_id).first()
         if not user:
             return render_template('error.html',
                                    message="User not found"), 404
@@ -123,7 +132,8 @@ def user_movies(user_id):
         elif sort == 'year_asc':
             movies = sorted(movies, key=lambda m: m.year)
         elif sort == 'year_desc':
-            movies = sorted(movies, key=lambda m: m.year, reverse=True)
+            movies = sorted(movies, key=lambda m: m.year,
+                            reverse=True)
         elif sort == 'rating_asc':
             movies = sorted(movies, key=lambda m: (m.rating or 0))
         elif sort == 'rating_desc':
@@ -137,10 +147,56 @@ def user_movies(user_id):
         session.close()
 
 
-@app.route('/users/<int:user_id>/add_movie', methods=['POST'])
+@app.route('/users/<int:user_id>/add_movie', methods=['GET', 'POST'])
 def add_movie_form(user_id):
     """
     Add a new movie to the user's list.
+
+    Args:
+        user_id (int): User's ID.
+
+    Returns:
+        Response: Renders search results for the user to select
+        or redirects to user's movie list.
+    """
+    session = data_manager.Session()
+    try:
+        user = session.query(User).options(
+            joinedload(User.movies)).filter(User.id == user_id).first()
+        if not user:
+            flash("User not found.", "danger")
+            return redirect(url_for('list_users'))
+
+        if request.method == 'POST':
+            title = request.form.get("title")
+            if not title:
+                flash("Title is required to add a movie.", "danger")
+                return redirect(url_for('user_movies',
+                                        user_id=user_id))
+
+            search_results = make_api_request(title)
+            if search_results:
+                return render_template('movie_search_results.html',
+                                       user=user,
+                                       search_results=search_results,
+                                       search_query=title,
+                                       user_id=user_id)
+            else:
+                flash(f"Movie '{title}' not found in OMDb.",
+                      "danger")
+                return redirect(url_for('user_movies',
+                                        user_id=user_id))
+        else:
+            return render_template('add_movie.html', user=user)
+    finally:
+        session.close()
+
+
+@app.route('/users/<int:user_id>/confirm_add_movie',
+           methods=['POST'])
+def confirm_add_movie(user_id):
+    """
+    Confirm and add the selected movie to the user's list.
 
     Args:
         user_id (int): User's ID.
@@ -156,14 +212,14 @@ def add_movie_form(user_id):
             flash("User not found.", "danger")
             return redirect(url_for('list_users'))
 
-        title = request.form.get("title")
-        if not title:
-            flash("Title is required to add a movie.", "danger")
+        imdb_id = request.form.get("imdb_id")
+        if not imdb_id:
+            flash("Movie selection is required.", "danger")
             return redirect(url_for('user_movies', user_id=user_id))
 
-        movie_data = make_api_request(title)
+        movie_data = make_api_request(imdb_id, by_id=True)
         if movie_data and movie_data.get("Response") == "True":
-            formatted_title = movie_data.get("Title", "Unknown").title()
+            title = movie_data.get("Title", "Unknown").title()
             director = movie_data.get("Director", "Unknown")
             year = movie_data.get("Year", "Unknown")
             rating = movie_data.get("imdbRating", None)
@@ -172,12 +228,13 @@ def add_movie_form(user_id):
             existing_movie = session.query(Movie).filter(
                 Movie.user_id == user_id,
                 (Movie.imdb_id == imdb_id) |
-                (Movie.name.ilike(formatted_title))).first()
+                (Movie.name.ilike(title))).first()
 
             if existing_movie:
-                flash(f"The movie '{formatted_title}' is already in your list.",
+                flash(f"The movie '{title}' is already in your list.",
                       "danger")
-                return redirect(url_for('user_movies', user_id=user_id))
+                return redirect(url_for('user_movies',
+                                        user_id=user_id))
 
             year = int(year) if year.isdigit() else None
             try:
@@ -185,13 +242,13 @@ def add_movie_form(user_id):
             except ValueError:
                 rating = None
 
-            data_manager.add_movie(user_id, formatted_title,
-                                   director, year, rating, imdb_id)
-            flash(f"Movie '{formatted_title}' added successfully.",
+            data_manager.add_movie(user_id, title, director,
+                                   year, rating, imdb_id)
+            flash(f"Movie '{title}' added successfully.",
                   "success")
             return redirect(url_for('user_movies', user_id=user_id))
         else:
-            flash(f"Movie '{title}' not found in OMDb.", "danger")
+            flash("Movie not found.", "danger")
             return redirect(url_for('user_movies', user_id=user_id))
     finally:
         session.close()
@@ -273,7 +330,8 @@ def delete_movie(user_id, movie_id):
     session = data_manager.Session()
     try:
         movie = session.query(Movie).filter(
-            Movie.id == movie_id, Movie.user_id == user_id).first()
+            Movie.id == movie_id,
+            Movie.user_id == user_id).first()
         if not movie:
             flash("Movie not found.", "danger")
             return redirect(url_for('user_movies', user_id=user_id))
