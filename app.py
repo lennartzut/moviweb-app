@@ -54,6 +54,36 @@ def add_user():
     return redirect(url_for('list_users'))
 
 
+@app.route('/users/<int:user_id>/delete', methods=['POST'])
+def delete_user(user_id):
+    """
+    Delete a specific user from the database.
+
+    Args:
+        user_id (int): The ID of the user to be deleted.
+
+    Returns:
+        Response: Redirect to the user list page.
+    """
+    session = data_manager.Session()
+    try:
+        user = session.query(User).filter(User.id == user_id).first()
+        if not user:
+            flash("User not found.", "danger")
+            return redirect(url_for('list_users'))
+
+        session.delete(user)
+        session.commit()
+        flash(f"User '{user.name}' deleted successfully.", "success")
+    except Exception as e:
+        flash(f"An error occurred while trying to delete user: {e}", "danger")
+        session.rollback()
+    finally:
+        session.close()
+
+    return redirect(url_for('list_users'))
+
+
 @app.route('/users/<int:user_id>', methods=['GET'])
 def user_movies(user_id):
     """
