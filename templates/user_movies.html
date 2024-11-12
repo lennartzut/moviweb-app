@@ -12,7 +12,6 @@
     <div class="container mt-5">
         <h2>Favorite Movies of {{ user.name }}</h2>
 
-        <!-- Flash Message Section -->
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="mt-4" id="flash-message-container">
@@ -28,11 +27,14 @@
         {% endif %}
         {% endwith %}
 
+        <a href="{{ url_for('list_users') }}" class="btn btn-secondary mb-4">
+            Back to User List
+        </a>
+
         <button type="button" class="btn btn-primary mb-4" data-toggle="modal" data-target="#addMovieModal">
             Add Movie
         </button>
 
-        <!-- Include Add Movie Modal -->
         {% include 'modals/add_movie_modal.html' %}
 
         <div class="row">
@@ -53,10 +55,8 @@
                 </div>
             </div>
 
-            <!-- Include Update Movie Modal for each movie -->
             {% include 'modals/update_movie_modal.html' %}
 
-            <!-- Include Delete Movie Modal for each movie -->
             {% include 'modals/delete_movie_modal.html' %}
 
             {% endfor %}
