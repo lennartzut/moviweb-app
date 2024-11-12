@@ -28,7 +28,6 @@
         {% endif %}
         {% endwith %}
 
-        <!-- Updated alignment for sorting, Add Movie, and Back to User List buttons -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div class="d-flex align-items-center">
                 <select class="form-control mr-2 w-auto" id="sortOptions" onchange="sortMovies()">
@@ -41,9 +40,14 @@
                 </select>
                 <button type="button" class="btn btn-primary ml-3" data-toggle="modal" data-target="#addMovieModal">Add Movie</button>
             </div>
-            <a href="{{ url_for('list_users') }}" class="btn btn-secondary ml-3">
-                Back to User List
-            </a>
+            <div class="d-flex align-items-center">
+                <form class="form-inline" method="get" action="{{ url_for('user_movies', user_id=user.id) }}">
+                    <input class="form-control" type="search" placeholder="Search" name="search" value="{{ request.args.get('search', '') }}" onkeydown="if (event.key === 'Enter') this.form.submit();">
+                </form>
+                <a href="{{ url_for('list_users') }}" class="btn btn-secondary ml-3">
+                    Back to User List
+                </a>
+            </div>
         </div>
 
         {% include 'modals/add_movie_modal.html' %}

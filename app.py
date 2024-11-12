@@ -98,51 +98,41 @@ def delete_user(user_id):
 
 @app.route('/users/<int:user_id>', methods=['GET'])
 def user_movies(user_id):
-    """
-    Get all movies for a specific user with optional sorting.
-
-    Args:
-        user_id (int): The ID of the user whose movies are to be retrieved.
-
-    Returns:
-        Rendered HTML page with the list of movies for the specified user.
-    """
     session = data_manager.Session()
     sort = request.args.get('sort', 'name_asc')
+    search_query = request.args.get('search', '').strip().lower()
 
     try:
-        user = session.query(User).options(
-            joinedload(User.movies)).filter(
-            User.id == user_id).first()
+        user = (session.query(User)
+                .options(joinedload(User.movies))
+                .filter(User.id == user_id)
+                .first())
         if not user:
             return render_template('error.html',
                                    message="User not found"), 404
 
+        movies = [m for m in user.movies if search_query in
+                  m.name.lower() or search_query in
+                  m.director.lower()] if search_query else user.movies
+
         if sort == 'name_asc':
-            movies = sorted(user.movies,
-                            key=lambda m: m.name.lower())
+            movies = sorted(movies, key=lambda m: m.name.lower())
         elif sort == 'name_desc':
-            movies = sorted(user.movies,
-                            key=lambda m: m.name.lower(),
+            movies = sorted(movies, key=lambda m: m.name.lower(),
                             reverse=True)
         elif sort == 'year_asc':
-            movies = sorted(user.movies, key=lambda m: m.year)
+            movies = sorted(movies, key=lambda m: m.year)
         elif sort == 'year_desc':
-            movies = sorted(user.movies, key=lambda m: m.year,
-                            reverse=True)
+            movies = sorted(movies, key=lambda m: m.year, reverse=True)
         elif sort == 'rating_asc':
-            movies = sorted(user.movies,
-                            key=lambda m: (m.rating or 0))
+            movies = sorted(movies, key=lambda m: (m.rating or 0))
         elif sort == 'rating_desc':
-            movies = sorted(user.movies,
-                            key=lambda m: (m.rating or 0),
+            movies = sorted(movies, key=lambda m: (m.rating or 0),
                             reverse=True)
-        else:
-            movies = user.movies
 
         return render_template('user_movies.html', user=user,
                                movies=movies, api_key=API_KEY,
-                               sort=sort)
+                               sort=sort, search=search_query)
     finally:
         session.close()
 
