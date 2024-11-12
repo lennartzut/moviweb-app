@@ -1,5 +1,5 @@
-from sqlalchemy import create_engine, Column, Integer, String, Float, \
-    ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, \
+    Float, ForeignKey
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker, scoped_session, \
     relationship, declarative_base
@@ -13,9 +13,9 @@ class User(Base):
     Represents a user in the database.
 
     Attributes:
-        id (int): The unique identifier for the user.
-        name (str): The name of the user.
-        movies (list): A list of Movie objects associated with the user.
+        id (int): User's unique ID.
+        name (str): User's name.
+        movies (list): List of associated Movie objects.
     """
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -28,13 +28,13 @@ class Movie(Base):
     Represents a movie in the database.
 
     Attributes:
-        id (int): The unique identifier for the movie.
-        name (str): The name of the movie.
-        director (str): The director of the movie.
-        year (int): The year the movie was released.
-        rating (float): The rating of the movie.
-        user_id (int): The ID of the user who added the movie.
-        imdb_id (str): The IMDb ID of the movie for fetching the poster.
+        id (int): Movie's unique ID.
+        name (str): Name of the movie.
+        director (str): Director of the movie.
+        year (int): Year of release.
+        rating (float): Rating of the movie.
+        user_id (int): ID of user who added the movie.
+        imdb_id (str): IMDb ID for movie poster.
     """
     __tablename__ = 'movies'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -50,10 +50,10 @@ class Movie(Base):
 class SQLiteDataManager(DataManagerInterface):
     def __init__(self, db_file_name):
         """
-        Initialize the SQLiteDataManager with a database file.
+        Initialize SQLiteDataManager.
 
         Args:
-            db_file_name (str): The name of the SQLite database file.
+            db_file_name (str): SQLite database file name.
         """
         self.engine = create_engine(f'sqlite:///{db_file_name}')
         Base.metadata.create_all(self.engine)
@@ -63,8 +63,8 @@ class SQLiteDataManager(DataManagerInterface):
         """
         Retrieve all users from the database.
 
-        Returns: list: A list of User objects representing all
-        users in the database.
+        Returns:
+            list: List of User objects.
         """
         try:
             session = self.Session()
@@ -77,23 +77,19 @@ class SQLiteDataManager(DataManagerInterface):
 
     def get_user_movies(self, user_id):
         """
-        Retrieve all movies for a specific user.
+        Retrieve movies for a specific user.
 
-        Args: user_id (int): The ID of the user whose movies are
-        to be retrieved.
+        Args:
+            user_id (int): ID of the user.
 
         Returns:
-            list: A list of Movie objects representing the user's
-            movies.
+            list: List of Movie objects.
         """
         try:
             session = self.Session()
-            user = session.query(User).filter(
-                User.id == user_id).first()
+            user = session.query(User).filter(User.id == user_id).first()
             session.close()
-            if user:
-                return user.movies
-            return []
+            return user.movies if user else []
         except SQLAlchemyError as e:
             print(f"Error getting user movies: {e}")
             return []
@@ -103,7 +99,7 @@ class SQLiteDataManager(DataManagerInterface):
         Add a new user to the database.
 
         Args:
-            user_name (str): The name of the user to be added.
+            user_name (str): Name of the user.
         """
         try:
             session = self.Session()
@@ -118,31 +114,27 @@ class SQLiteDataManager(DataManagerInterface):
     def add_movie(self, user_id, title, director, year, rating,
                   imdb_id):
         """
-        Add a new movie to the database for a specific user.
+        Add a movie to the database.
 
         Args:
-            user_id (int): The ID of the user to whom the movie belongs.
-            title (str): The title of the movie.
-            director (str): The director of the movie.
-            year (int): The year the movie was released.
-            rating (float): The rating of the movie.
-            imdb_id (str): The IMDb ID of the movie for fetching the poster.
+            user_id (int): ID of the user.
+            title (str): Movie title.
+            director (str): Director of the movie.
+            year (int): Year of release.
+            rating (float): Rating of the movie.
+            imdb_id (str): IMDb ID for the movie.
         """
         session = self.Session()
         try:
             formatted_title = title.title()
-
             new_movie = Movie(
-                name=formatted_title,
-                director=director,
-                year=year,
-                rating=rating,
-                user_id=user_id,
+                name=formatted_title, director=director,
+                year=year, rating=rating, user_id=user_id,
                 imdb_id=imdb_id
             )
             session.add(new_movie)
             session.commit()
-        except Exception as e:
+        except SQLAlchemyError as e:
             print(f"Error adding movie: {e}")
             session.rollback()
         finally:
@@ -151,19 +143,18 @@ class SQLiteDataManager(DataManagerInterface):
     def update_movie(self, movie_id, title=None, director=None,
                      year=None, rating=None):
         """
-        Update the details of a specific movie in the database.
+        Update movie details in the database.
 
         Args:
-            movie_id (int): The ID of the movie to be updated.
-            title (str, optional): The new title of the movie.
-            director (str, optional): The new director of the movie.
-            year (int, optional): The new year of release of the movie.
-            rating (float, optional): The new rating of the movie.
+            movie_id (int): Movie's ID.
+            title (str, optional): Updated title.
+            director (str, optional): Updated director.
+            year (int, optional): Updated year of release.
+            rating (float, optional): Updated rating.
         """
         try:
             session = self.Session()
-            movie = session.query(Movie).filter(
-                Movie.id == movie_id).first()
+            movie = session.query(Movie).filter(Movie.id == movie_id).first()
             if movie:
                 if title:
                     movie.name = title
@@ -181,15 +172,14 @@ class SQLiteDataManager(DataManagerInterface):
 
     def delete_movie(self, movie_id):
         """
-        Delete a specific movie from the database.
+        Delete a movie from the database.
 
         Args:
-            movie_id (int): The ID of the movie to be deleted.
+            movie_id (int): ID of the movie to delete.
         """
         try:
             session = self.Session()
-            movie = session.query(Movie).filter(
-                Movie.id == movie_id).first()
+            movie = session.query(Movie).filter(Movie.id == movie_id).first()
             if movie:
                 session.delete(movie)
                 session.commit()

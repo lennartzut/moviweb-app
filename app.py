@@ -1,5 +1,6 @@
 import os
-from flask import Flask, flash, render_template, request, redirect, url_for
+from flask import Flask, flash, render_template, request, \
+    redirect, url_for
 from sqlalchemy.orm import joinedload
 from api import make_api_request
 from datamanager import Movie, User, SQLiteDataManager
@@ -14,17 +15,35 @@ data_manager = SQLiteDataManager("moviweb.db")
 
 @app.route('/')
 def home():
+    """
+    Render the home page.
+
+    Returns:
+        str: HTML for the home page.
+    """
     return render_template('home.html')
 
 
 @app.route('/users', methods=['GET'])
 def list_users():
+    """
+    Display a list of all users.
+
+    Returns:
+        str: HTML for the users list.
+    """
     users = data_manager.get_all_users()
     return render_template('users.html', users=users)
 
 
 @app.route('/add_user', methods=['POST'])
 def add_user():
+    """
+    Add a new user based on form input.
+
+    Returns:
+        Response: Redirect to the users list page.
+    """
     user_name = request.form.get("name")
     if not user_name:
         flash("Name is required to add a user.", "danger")
@@ -37,21 +56,43 @@ def add_user():
 
 @app.route('/users/<int:user_id>', methods=['GET'])
 def user_movies(user_id):
+    """
+    Display movies for a specific user.
+
+    Args:
+        user_id (int): User's ID.
+
+    Returns:
+        str: HTML page with user movies or error.
+    """
     session = data_manager.Session()
     try:
-        user = session.query(User).options(joinedload(User.movies)).filter(User.id == user_id).first()
+        user = session.query(User).options(
+            joinedload(User.movies)).filter(User.id == user_id).first()
         if not user:
-            return render_template('error.html', message="User not found"), 404
-        return render_template('user_movies.html', user=user, movies=user.movies, api_key=API_KEY)
+            return render_template('error.html',
+                                   message="User not found"), 404
+        return render_template('user_movies.html', user=user,
+                               movies=user.movies, api_key=API_KEY)
     finally:
         session.close()
 
 
 @app.route('/users/<int:user_id>/add_movie', methods=['POST'])
 def add_movie_form(user_id):
+    """
+    Add a new movie to the user's list.
+
+    Args:
+        user_id (int): User's ID.
+
+    Returns:
+        Response: Redirect to user's movie list.
+    """
     session = data_manager.Session()
     try:
-        user = session.query(User).options(joinedload(User.movies)).filter(User.id == user_id).first()
+        user = session.query(User).options(
+            joinedload(User.movies)).filter(User.id == user_id).first()
         if not user:
             flash("User not found.", "danger")
             return redirect(url_for('list_users'))
@@ -61,7 +102,6 @@ def add_movie_form(user_id):
             flash("Title is required to add a movie.", "danger")
             return redirect(url_for('user_movies', user_id=user_id))
 
-        # Fetch movie details using the OMDb API
         movie_data = make_api_request(title)
         if movie_data and movie_data.get("Response") == "True":
             formatted_title = movie_data.get("Title", "Unknown").title()
@@ -72,11 +112,12 @@ def add_movie_form(user_id):
 
             existing_movie = session.query(Movie).filter(
                 Movie.user_id == user_id,
-                (Movie.imdb_id == imdb_id) | (Movie.name.ilike(formatted_title))
-            ).first()
+                (Movie.imdb_id == imdb_id) |
+                (Movie.name.ilike(formatted_title))).first()
 
             if existing_movie:
-                flash(f"The movie '{formatted_title}' is already in your list.", "danger")
+                flash(f"The movie '{formatted_title}' is already in your list.",
+                      "danger")
                 return redirect(url_for('user_movies', user_id=user_id))
 
             year = int(year) if year.isdigit() else None
@@ -85,8 +126,10 @@ def add_movie_form(user_id):
             except ValueError:
                 rating = None
 
-            data_manager.add_movie(user_id, formatted_title, director, year, rating, imdb_id)
-            flash(f"Movie '{formatted_title}' added successfully.", "success")
+            data_manager.add_movie(user_id, formatted_title,
+                                   director, year, rating, imdb_id)
+            flash(f"Movie '{formatted_title}' added successfully.",
+                  "success")
             return redirect(url_for('user_movies', user_id=user_id))
         else:
             flash(f"Movie '{title}' not found in OMDb.", "danger")
@@ -95,11 +138,23 @@ def add_movie_form(user_id):
         session.close()
 
 
-@app.route('/users/<int:user_id>/update_movie/<int:movie_id>', methods=['POST'])
+@app.route('/users/<int:user_id>/update_movie/<int:movie_id>',
+           methods=['POST'])
 def update_movie(user_id, movie_id):
+    """
+    Update an existing movie in the user's list.
+
+    Args:
+        user_id (int): User's ID.
+        movie_id (int): Movie's ID.
+
+    Returns:
+        Response: Redirect to user's movie list.
+    """
     session = data_manager.Session()
     try:
-        user = session.query(User).options(joinedload(User.movies)).filter(User.id == user_id).first()
+        user = session.query(User).options(
+            joinedload(User.movies)).filter(User.id == user_id).first()
         if not user:
             flash("User not found.", "danger")
             return redirect(url_for('list_users'))
@@ -132,7 +187,8 @@ def update_movie(user_id, movie_id):
                     raise ValueError("Rating must be between 1.0 and 10.0.")
                 movie.rating = rating
             except ValueError:
-                flash("Rating must be a decimal between 1.0 and 10.0.", "danger")
+                flash("Rating must be a decimal between 1.0 and 10.0.",
+                      "danger")
                 return redirect(url_for('user_movies', user_id=user_id))
 
         session.commit()
@@ -142,11 +198,23 @@ def update_movie(user_id, movie_id):
         session.close()
 
 
-@app.route('/users/<int:user_id>/delete_movie/<int:movie_id>', methods=['POST'])
+@app.route('/users/<int:user_id>/delete_movie/<int:movie_id>',
+           methods=['POST'])
 def delete_movie(user_id, movie_id):
+    """
+    Delete a movie from the user's list.
+
+    Args:
+        user_id (int): User's ID.
+        movie_id (int): Movie's ID.
+
+    Returns:
+        Response: Redirect to user's movie list.
+    """
     session = data_manager.Session()
     try:
-        movie = session.query(Movie).filter(Movie.id == movie_id, Movie.user_id == user_id).first()
+        movie = session.query(Movie).filter(
+            Movie.id == movie_id, Movie.user_id == user_id).first()
         if not movie:
             flash("Movie not found.", "danger")
             return redirect(url_for('user_movies', user_id=user_id))

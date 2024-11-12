@@ -6,8 +6,17 @@ load_dotenv()
 
 API_KEY = os.getenv('API_KEY')
 
+
 def make_api_request(movie_title):
-    """Make an API request to OMDb API with the provided movie title."""
+    """
+    Request movie data from OMDb API.
+
+    Args:
+        movie_title (str): The title of the movie.
+
+    Returns:
+        dict: JSON response with movie data or None if there's an error.
+    """
     if not API_KEY:
         print("Error: API_KEY is not set. Please check your .env file.")
         return None
@@ -21,9 +30,10 @@ def make_api_request(movie_title):
             print("Error:", response.status_code, response.json())
             return None
     except requests.exceptions.Timeout:
-        print("Error: The request timed out. Please try again later.")
+        print("Error: The request timed out. Try again later.")
     except requests.exceptions.ConnectionError:
-        print("Error: Failed to connect to the OMDb API. Please check your internet connection.")
+        print("Error: Failed to connect to OMDb API. "
+              "Check your internet connection.")
     except requests.exceptions.RequestException as e:
         print("Error:", e)
-        return None
+    return None

@@ -1,21 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to MoviWeb App</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body>
-    <div class="container mt-5 text-center">
+    <header class="container mt-5 text-center">
         <h1>Welcome to MoviWeb App!</h1>
-        <p class="lead">Manage your favorite movies and keep track of user collections easily.</p>
-        <div class="mt-4">
-            <a href="{{ url_for('list_users') }}" class="btn btn-primary btn-lg">View Users</a>
-        </div>
-    </div>
+        <p class="lead">
+            Manage your favorite movies and keep track of user collections easily.
+        </p>
+    </header>
+
+    <main class="container text-center mt-4">
+        <a href="{{ url_for('list_users') }}" class="btn btn-primary btn-lg">
+            View Users
+        </a>
+    </main>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

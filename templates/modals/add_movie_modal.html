@@ -9,24 +9,6 @@
             </div>
             <form method="POST" action="{{ url_for('add_movie_form', user_id=user.id) }}">
                 <div class="modal-body">
-                    <!-- Flash messages for errors in the modal -->
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        <div id="modal-flash-message">
-                            {% for category, message in messages %}
-                                {% if category == 'danger' %}
-                                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                                        {{ message }}
-                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                    {% endwith %}
-
                     <div class="form-group">
                         <label for="title">Movie Title</label>
                         <input type="text" class="form-control" id="title" name="title" required>
@@ -40,13 +22,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    // Automatically hide flash messages inside the modal after 5 seconds
-    setTimeout(function() {
-        let modalFlashMessage = document.getElementById('modal-flash-message');
-        if (modalFlashMessage) {
-            modalFlashMessage.style.display = 'none';
-        }
-    }, 5000);
-</script>
