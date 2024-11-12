@@ -44,14 +44,26 @@ def add_user():
     Returns:
         Response: Redirect to the users list page.
     """
-    user_name = request.form.get("name")
+    user_name = request.form.get("name").strip()
     if not user_name:
         flash("Name is required to add a user.", "danger")
         return redirect(url_for('list_users'))
 
-    data_manager.add_user(user_name)
-    flash(f"User '{user_name}' added successfully.", "success")
-    return redirect(url_for('list_users'))
+    # Check if the user already exists
+    session = data_manager.Session()
+    try:
+        existing_user = session.query(User).filter(User.name.ilike(user_name)).first()
+        if existing_user:
+            flash(f"User '{user_name}' already exists. Please "
+                  f"choose a different name.", "danger")
+            return redirect(url_for('list_users'))
+
+        # Add new user
+        data_manager.add_user(user_name)
+        flash(f"User '{user_name}' added successfully.", "success")
+        return redirect(url_for('list_users'))
+    finally:
+        session.close()
 
 
 @app.route('/users/<int:user_id>/delete', methods=['POST'])
