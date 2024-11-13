@@ -21,9 +21,10 @@
                         <label for="year-{{ movie.id }}">Year</label>
                         <input type="number" class="form-control" id="year-{{ movie.id }}" name="year" value="{{ movie.year }}">
                     </div>
-                    <div class="form-group text-left">
+                    <div class="form-group">
                         <label for="rating-{{ movie.id }}">Rating</label>
-                        <input type="text" class="form-control" id="rating-{{ movie.id }}" name="rating" value="{{ '{:.1f}'.format(movie.rating) }}" required>
+                        <input type="text" class="form-control" id="rating-{{ movie.id }}"
+                        name="rating" value="{{ '{:.1f}'.format(movie.rating) if movie.rating is not none else '' }}" required>
                     </div>
                 </div>
                 <div class="modal-footer">

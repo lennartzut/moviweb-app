@@ -42,7 +42,9 @@
             </div>
             <div class="d-flex align-items-center">
                 <form class="form-inline" method="get" action="{{ url_for('user_movies', user_id=user.id) }}">
-                    <input class="form-control" type="search" placeholder="Search" name="search" value="{{ request.args.get('search', '') }}" onkeydown="if (event.key === 'Enter') this.form.submit();">
+                    <input class="form-control" type="search"
+                           placeholder="Search Collection"
+                           name="search" value="{{ request.args.get('search', '') }}" onkeydown="if (event.key === 'Enter') this.form.submit();">
                 </form>
                 <a href="{{ url_for('list_users') }}" class="btn btn-secondary ml-3">
                     Back to User List
@@ -80,9 +82,26 @@
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
+        $(document).ready(function() {
+            // Show the modal if search results exist
+            {% if search_results and search_results|length > 0 %}
+            $('#addMovieModal').modal('show');
+            {% endif %}
+
+            // Clear the search field and previous results when closing the modal
+            $('#addMovieModal').on('hidden.bs.modal', function () {
+                $('#addMovieModal input[name="title"]').val('');
+                $('#addMovieModal .search-results-container').html('');
+
+                // Ensure the user movies page is reloaded properly
+                window.location.href = '{{ url_for("user_movies", user_id=user.id) }}';
+            });
+        });
+
         function sortMovies() {
             let sortOption = document.getElementById('sortOptions').value;
             window.location.href = `{{ url_for('user_movies', user_id=user.id) }}?sort=${sortOption}`;

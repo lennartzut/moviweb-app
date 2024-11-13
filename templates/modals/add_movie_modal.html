@@ -1,24 +1,38 @@
-<div class="modal fade" id="addMovieModal" tabindex="-1" aria-labelledby="addMovieModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
+<div class="modal fade" id="addMovieModal" tabindex="-1" role="dialog" aria-labelledby="addMovieModalLabel" aria-hidden="true" {% if search_results %}data-show="true"{% endif %}>
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="background-color: #343a40; color: white;">
             <div class="modal-header">
-                <h5 class="modal-title" id="addMovieModalLabel">Add New Movie</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <h5 class="modal-title" id="addMovieModalLabel">Search and Add Movies</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form method="POST" action="{{ url_for('add_movie_form', user_id=user.id) }}">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="title">Movie Title</label>
-                        <input type="text" class="form-control" id="title" name="title" required>
-                    </div>
+            <div class="modal-body">
+                <div class="form-group d-flex">
+                    <form method="POST" action="{{ url_for('add_movie_form', user_id=user.id) }}" class="d-flex w-100">
+                        <input type="text" name="title" class="form-control" id="search-title" placeholder="Enter movie title..." value="{{ search_query if search_query }}">
+                    </form>
                 </div>
-                <div class="modal-footer">
+
+                {% if search_results %}
+                <div id="search-results-container" style="max-height: 300px; overflow-y: auto;">
+                    <ul class="list-group">
+                        {% for movie in search_results %}
+                        <li class="list-group-item bg-dark text-light d-flex align-items-center">
+                            <input type="checkbox" name="imdb_id" value="{{ movie.imdbID }}" form="confirm-add-form" class="mr-2">
+                            <strong>{{ movie.Title }}</strong> ({{ movie.Year }})
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <form method="POST" action="{{ url_for('confirm_add_movie', user_id=user.id) }}" id="confirm-add-form">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Add Movie</button>
-                </div>
-            </form>
+                    <button type="submit" class="btn btn-primary">Add Movie(s)</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

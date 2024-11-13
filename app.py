@@ -162,32 +162,32 @@ def add_movie_form(user_id):
     session = data_manager.Session()
     try:
         user = session.query(User).options(
-            joinedload(User.movies)).filter(User.id == user_id).first()
+            joinedload(User.movies)).filter(
+            User.id == user_id).first()
         if not user:
             flash("User not found.", "danger")
             return redirect(url_for('list_users'))
 
+        search_results = None
         if request.method == 'POST':
             title = request.form.get("title")
             if not title:
                 flash("Title is required to add a movie.", "danger")
-                return redirect(url_for('user_movies',
-                                        user_id=user_id))
+                return redirect(
+                    url_for('user_movies', user_id=user_id))
 
+            # Make the request to the API to search movies
             search_results = make_api_request(title)
-            if search_results:
-                return render_template('movie_search_results.html',
-                                       user=user,
-                                       search_results=search_results,
-                                       search_query=title,
-                                       user_id=user_id)
-            else:
+            if not search_results:
                 flash(f"Movie '{title}' not found in OMDb.",
                       "danger")
-                return redirect(url_for('user_movies',
-                                        user_id=user_id))
-        else:
-            return render_template('add_movie.html', user=user)
+
+        return render_template('user_movies.html',
+                               user=user,
+                               search_results=search_results,
+                               search_query=title if search_results else None,
+                               user_id=user_id,
+                               api_key=API_KEY)
     finally:
         session.close()
 
@@ -195,61 +195,58 @@ def add_movie_form(user_id):
 @app.route('/users/<int:user_id>/confirm_add_movie',
            methods=['POST'])
 def confirm_add_movie(user_id):
-    """
-    Confirm and add the selected movie to the user's list.
-
-    Args:
-        user_id (int): User's ID.
-
-    Returns:
-        Response: Redirect to user's movie list.
-    """
     session = data_manager.Session()
     try:
         user = session.query(User).options(
-            joinedload(User.movies)).filter(User.id == user_id).first()
+            joinedload(User.movies)).filter(
+            User.id == user_id).first()
         if not user:
             flash("User not found.", "danger")
             return redirect(url_for('list_users'))
 
-        imdb_id = request.form.get("imdb_id")
-        if not imdb_id:
+        imdb_ids = request.form.getlist("imdb_id")
+        if not imdb_ids:
             flash("Movie selection is required.", "danger")
             return redirect(url_for('user_movies', user_id=user_id))
 
-        movie_data = make_api_request(imdb_id, by_id=True)
-        if movie_data and movie_data.get("Response") == "True":
-            title = movie_data.get("Title", "Unknown").title()
-            director = movie_data.get("Director", "Unknown")
-            year = movie_data.get("Year", "Unknown")
-            rating = movie_data.get("imdbRating", None)
-            imdb_id = movie_data.get("imdbID", None)
+        added_movies = []
+        for imdb_id in imdb_ids:
+            movie_data = make_api_request(imdb_id, by_id=True)
+            if movie_data and movie_data.get("Response") == "True":
+                title = movie_data.get("Title", "Unknown").title()
+                director = movie_data.get("Director", "Unknown")
+                year = movie_data.get("Year", None)
+                rating = movie_data.get("imdbRating", None)
 
-            existing_movie = session.query(Movie).filter(
-                Movie.user_id == user_id,
-                (Movie.imdb_id == imdb_id) |
-                (Movie.name.ilike(title))).first()
+                # Handle NoneType values
+                year = int(year) if year and year.isdigit() else None
+                try:
+                    rating = float(rating) if rating else None
+                except ValueError:
+                    rating = None
 
-            if existing_movie:
-                flash(f"The movie '{title}' is already in your list.",
-                      "danger")
-                return redirect(url_for('user_movies',
-                                        user_id=user_id))
+                existing_movie = session.query(Movie).filter(
+                    Movie.user_id == user_id,
+                    (Movie.imdb_id == imdb_id) |
+                    (Movie.name.ilike(title))).first()
 
-            year = int(year) if year.isdigit() else None
-            try:
-                rating = float(rating) if rating else None
-            except ValueError:
-                rating = None
+                if existing_movie:
+                    flash(
+                        f"The movie '{title}' is already in your list.",
+                        "danger")
+                    continue
 
-            data_manager.add_movie(user_id, title, director,
-                                   year, rating, imdb_id)
-            flash(f"Movie '{title}' added successfully.",
-                  "success")
-            return redirect(url_for('user_movies', user_id=user_id))
+                data_manager.add_movie(user_id, title, director,
+                                       year, rating, imdb_id)
+                added_movies.append(title)
+
+        if added_movies:
+            flash(
+                f"Movies '{', '.join(added_movies)}' added successfully.",
+                "success")
         else:
-            flash("Movie not found.", "danger")
-            return redirect(url_for('user_movies', user_id=user_id))
+            flash("No new movies were added.", "danger")
+        return redirect(url_for('user_movies', user_id=user_id))
     finally:
         session.close()
 
