@@ -18,7 +18,7 @@ header, .main-container {
     text-align: center;
 }
 
-/* Button styles */
+/* Button and action input styles */
 .btn-primary, .btn-secondary, .btn-danger, .btn-warning, .btn-outline-light {
     border: none;
     box-shadow: none;
@@ -58,14 +58,9 @@ header, .main-container {
     background-color: #ec971f;
 }
 
-.btn-outline-light {
-    border-color: #ffffff;
-    color: #ffffff;
-}
-
-.btn-outline-light:hover {
-    background-color: #ffffff;
-    color: #343a40;
+.action-button {
+    width: calc(20% - 10px);
+    margin: 0 5px;
 }
 
 /* Flash messages */
@@ -78,18 +73,15 @@ header, .main-container {
 }
 
 .alert-success {
-    background-color: #28a745;  /* Greenish color for success messages */
-    color: #ffffff;
+    background-color: #28a745;
 }
 
 .alert-danger {
-    background-color: #dc3545;  /* Reddish color for danger messages */
-    color: #ffffff;
+    background-color: #dc3545;
 }
 
 .alert-error, .alert-warning {
-    background-color: #ff7043;  /* Default orange for error and warning */
-    color: #ffffff;
+    background-color: #ff7043;
 }
 
 /* Modal content */
@@ -113,7 +105,7 @@ header, .main-container {
     height: 100%;
     overflow: hidden;
     position: relative;
-    background-color: transparent; /* Removed background color */
+    background-color: transparent;
 }
 
 .card:hover {
@@ -131,11 +123,11 @@ header, .main-container {
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease-in-out;
-    border-radius: 12px;  /* To match the rounded corners of the card */
+    border-radius: 12px;
 }
 
 .card:hover .card-img-top {
-    transform: scale(1.1);  /* Slight zoom effect on hover */
+    transform: scale(1.1);
 }
 
 .card-info {
@@ -195,28 +187,28 @@ header, .main-container {
     margin: 0;
 }
 
-.col-md-3 {
-    flex: 0 0 calc(25% - 1rem);
-    max-width: calc(25% - 1rem);
+.col-md-2 {
+    flex: 0 0 calc(20% - 1rem);
+    max-width: calc(20% - 1rem);
     margin-bottom: 1rem;
 }
 
 @media (max-width: 992px) {
-    .col-md-3 {
+    .col-md-2 {
         flex: 0 0 calc(33.333% - 1rem);
         max-width: calc(33.333% - 1rem);
     }
 }
 
 @media (max-width: 768px) {
-    .col-md-3 {
+    .col-md-2 {
         flex: 0 0 calc(50% - 1rem);
         max-width: calc(50% - 1rem);
     }
 }
 
 @media (max-width: 576px) {
-    .col-md-3 {
+    .col-md-2 {
         flex: 0 0 100%;
         max-width: 100%;
     }
@@ -237,12 +229,12 @@ header, .main-container {
     justify-content: space-between;
     align-items: center;
     background-color: transparent;
-    color: #e0e0e0;  /* Lightened the user name color for better readability */
+    color: #e0e0e0;
     font-weight: 600;
 }
 
 .list-group-item a {
-    color: #f8f9fa;  /* Brighter color for improved contrast */
+    color: #f8f9fa;
     font-weight: 700;
 }
 

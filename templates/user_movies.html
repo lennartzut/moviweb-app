@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Movies - MoviWeb App</title>
+    <title>{{ user.name }} - MoviWeb App</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
-<body style="background-color: #343a40;">
+<body>
     <div class="container mt-3" style="max-width: 1200px;">
-        <h2 class="text-center text-light mb-3">Favorite Movies of {{ user.name }}</h2>
+        <h2 class="text-center text-light mb-3">Movies Collection of {{ user.name }}</h2>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -28,45 +28,42 @@
         {% endif %}
         {% endwith %}
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="d-flex align-items-center">
-                <select class="form-control mr-2 w-auto" id="sortOptions" onchange="sortMovies()">
-                    <option value="name_asc" {% if sort == 'name_asc' %}selected{% endif %}>Name (A-Z)</option>
-                    <option value="name_desc" {% if sort == 'name_desc' %}selected{% endif %}>Name (Z-A)</option>
-                    <option value="year_asc" {% if sort == 'year_asc' %}selected{% endif %}>Year (Ascending)</option>
-                    <option value="year_desc" {% if sort == 'year_desc' %}selected{% endif %}>Year (Descending)</option>
-                    <option value="rating_asc" {% if sort == 'rating_asc' %}selected{% endif %}>Rating (Low to High)</option>
-                    <option value="rating_desc" {% if sort == 'rating_desc' %}selected{% endif %}>Rating (High to Low)</option>
-                </select>
-                <button type="button" class="btn btn-primary ml-3" data-toggle="modal" data-target="#addMovieModal">Add Movie</button>
-            </div>
-            <div class="d-flex align-items-center">
-                <form class="form-inline" method="get" action="{{ url_for('user_movies', user_id=user.id) }}">
-                    <input class="form-control" type="search"
-                           placeholder="Search Collection"
-                           name="search" value="{{ request.args.get('search', '') }}" onkeydown="if (event.key === 'Enter') this.form.submit();">
-                </form>
-                <a href="{{ url_for('list_users') }}" class="btn btn-secondary ml-3">
-                    Back to User List
-                </a>
-            </div>
+        <div class="sorting-and-actions d-flex justify-content-center mb-4">
+            <button type="button" class="btn btn-primary action-button" data-toggle="modal" data-target="#addMovieModal">Add Movie</button>
+
+            <!-- Switched Search and Sorting -->
+            <form class="form-inline action-button" method="get" action="{{ url_for('user_movies', user_id=user.id) }}">
+                <input class="form-control" type="search"
+                       placeholder="Search Collection"
+                       name="search" value="{{ request.args.get('search', '') }}" onkeydown="if (event.key === 'Enter') this.form.submit();">
+            </form>
+
+            <select class="form-control action-button" id="sortOptions" onchange="sortMovies()">
+                <option value="name_asc" {% if sort == 'name_asc' %}selected{% endif %}>Name (A-Z)</option>
+                <option value="name_desc" {% if sort == 'name_desc' %}selected{% endif %}>Name (Z-A)</option>
+                <option value="year_asc" {% if sort == 'year_asc' %}selected{% endif %}>Year (Ascending)</option>
+                <option value="year_desc" {% if sort == 'year_desc' %}selected{% endif %}>Year (Descending)</option>
+                <option value="rating_asc" {% if sort == 'rating_asc' %}selected{% endif %}>Rating (Low to High)</option>
+                <option value="rating_desc" {% if sort == 'rating_desc' %}selected{% endif %}>Rating (High to Low)</option>
+            </select>
+
+            <a href="{{ url_for('list_users') }}" class="btn btn-secondary action-button">
+                Change User
+            </a>
         </div>
 
         {% include 'modals/add_movie_modal.html' %}
 
         <div class="row justify-content-center">
             {% for movie in movies %}
-            <div class="col-md-3 mb-4">
-                <div class="card movie-card" style="border: none;">
-                    <div class="card-img-container" style="height: 300px; overflow: hidden;">
-                        <img src="http://img.omdbapi.com/?apikey={{ api_key }}&i={{ movie.imdb_id }}" class="card-img-top" alt="{{ movie.name }} Poster" style="width: 100%; height: 100%; object-fit: cover;">
+            <div class="col-md-2 mb-4">
+                <div class="card movie-card">
+                    <div class="card-img-container">
+                        <img src="http://img.omdbapi.com/?apikey={{ api_key }}&i={{ movie.imdb_id }}" class="card-img-top" alt="{{ movie.name }} Poster">
                     </div>
                     <div class="card-info p-3">
                         <h5 class="card-title">{{ movie.name }}</h5>
-                        <p class="card-text text">Directed by <br>
-                            {{ movie.director }}<br>
-                            {{ movie.year}}<br>
-                        </p>
+                        <p class="card-text">Directed by {{ movie.director }}<br> {{ movie.year }}<br></p>
                         <p class="card-rating">Rated {{ movie.rating }}</p>
                         <div class="d-flex justify-content-between">
                             <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#updateMovieModal-{{ movie.id }}">Update</button>
@@ -87,8 +84,8 @@
 
     <script>
         $(document).ready(function() {
-            // Show the modal if search results exist
-            {% if search_results and search_results|length > 0 %}
+            // Show the modal if search results exist or if there's a reason to keep the modal open
+            {% if keep_modal_open %}
             $('#addMovieModal').modal('show');
             {% endif %}
 
@@ -104,7 +101,10 @@
 
         function sortMovies() {
             let sortOption = document.getElementById('sortOptions').value;
-            window.location.href = `{{ url_for('user_movies', user_id=user.id) }}?sort=${sortOption}`;
+            let searchQuery = document.querySelector('input[name="search"]').value;
+
+            // Redirect to user_movies with both sorting and search query parameters
+            window.location.href = `{{ url_for('user_movies', user_id=user.id) }}?sort=${sortOption}&search=${searchQuery}`;
         }
 
         setTimeout(function() {

@@ -147,17 +147,16 @@ def user_movies(user_id):
         session.close()
 
 
-@app.route('/users/<int:user_id>/add_movie', methods=['GET', 'POST'])
+@app.route('/users/<int:user_id>/add_movie', methods=['GET'])
 def add_movie_form(user_id):
     """
-    Add a new movie to the user's list.
+    Search for a movie to add to the user's list.
 
     Args:
         user_id (int): User's ID.
 
     Returns:
-        Response: Renders search results for the user to select
-        or redirects to user's movie list.
+        Response: Renders search results for the user to select.
     """
     session = data_manager.Session()
     try:
@@ -168,26 +167,48 @@ def add_movie_form(user_id):
             flash("User not found.", "danger")
             return redirect(url_for('list_users'))
 
+        search_query = request.args.get("title")
         search_results = None
-        if request.method == 'POST':
-            title = request.form.get("title")
-            if not title:
-                flash("Title is required to add a movie.", "danger")
-                return redirect(
-                    url_for('user_movies', user_id=user_id))
 
-            # Make the request to the API to search movies
-            search_results = make_api_request(title)
-            if not search_results:
-                flash(f"Movie '{title}' not found in OMDb.",
-                      "danger")
+        if search_query is None:
+            flash("Please enter a movie title to search.", "warning")
+            return render_template('user_movies.html',
+                                   user=user,
+                                   search_results=None,
+                                   search_query=None,
+                                   user_id=user_id,
+                                   api_key=API_KEY,
+                                   keep_modal_open=True)
+
+        if search_query.strip() == "":
+            flash("Please enter a movie title to search.", "warning")
+            return render_template('user_movies.html',
+                                   user=user,
+                                   search_results=None,
+                                   search_query=None,
+                                   user_id=user_id,
+                                   api_key=API_KEY,
+                                   keep_modal_open=True)
+
+        # Make the request to the API to search movies
+        search_results = make_api_request(search_query)
+        if not search_results:
+            flash(f"Movie '{search_query}' not found in OMDb.", "danger")
+            return render_template('user_movies.html',
+                                   user=user,
+                                   search_results=None,
+                                   search_query=None,
+                                   user_id=user_id,
+                                   api_key=API_KEY,
+                                   keep_modal_open=True)
 
         return render_template('user_movies.html',
                                user=user,
                                search_results=search_results,
-                               search_query=title if search_results else None,
+                               search_query=search_query,
                                user_id=user_id,
-                               api_key=API_KEY)
+                               api_key=API_KEY,
+                               keep_modal_open=True)
     finally:
         session.close()
 
@@ -195,6 +216,15 @@ def add_movie_form(user_id):
 @app.route('/users/<int:user_id>/confirm_add_movie',
            methods=['POST'])
 def confirm_add_movie(user_id):
+    """
+    Add selected movies to the user's list.
+
+    Args:
+        user_id (int): User's ID.
+
+    Returns:
+        Response: Redirects to user's movie list.
+    """
     session = data_manager.Session()
     try:
         user = session.query(User).options(
@@ -204,7 +234,7 @@ def confirm_add_movie(user_id):
             flash("User not found.", "danger")
             return redirect(url_for('list_users'))
 
-        imdb_ids = request.form.getlist("imdb_id")
+        imdb_ids = request.form.getlist("imdb_ids")
         if not imdb_ids:
             flash("Movie selection is required.", "danger")
             return redirect(url_for('user_movies', user_id=user_id))
