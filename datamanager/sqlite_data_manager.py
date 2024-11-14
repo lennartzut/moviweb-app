@@ -66,14 +66,14 @@ class SQLiteDataManager(DataManagerInterface):
         Returns:
             list: List of User objects.
         """
+        session = self.Session()
         try:
-            session = self.Session()
-            users = session.query(User).all()
-            session.close()
-            return users
+            return session.query(User).all()
         except SQLAlchemyError as e:
             print(f"Error getting all users: {e}")
             return []
+        finally:
+            session.close()
 
     def get_user_movies(self, user_id):
         """
@@ -85,14 +85,16 @@ class SQLiteDataManager(DataManagerInterface):
         Returns:
             list: List of Movie objects.
         """
+        session = self.Session()
         try:
-            session = self.Session()
-            user = session.query(User).filter(User.id == user_id).first()
-            session.close()
+            user = session.query(User).filter(
+                User.id == user_id).first()
             return user.movies if user else []
         except SQLAlchemyError as e:
             print(f"Error getting user movies: {e}")
             return []
+        finally:
+            session.close()
 
     def add_user(self, user_name):
         """
@@ -101,15 +103,16 @@ class SQLiteDataManager(DataManagerInterface):
         Args:
             user_name (str): Name of the user.
         """
+        session = self.Session()
         try:
-            session = self.Session()
             new_user = User(name=user_name)
             session.add(new_user)
             session.commit()
-            session.close()
         except SQLAlchemyError as e:
             print(f"Error adding user: {e}")
             session.rollback()
+        finally:
+            session.close()
 
     def add_movie(self, user_id, title, director, year, rating,
                   imdb_id):
@@ -152,9 +155,10 @@ class SQLiteDataManager(DataManagerInterface):
             year (int, optional): Updated year of release.
             rating (float, optional): Updated rating.
         """
+        session = self.Session()
         try:
-            session = self.Session()
-            movie = session.query(Movie).filter(Movie.id == movie_id).first()
+            movie = session.query(Movie).filter(
+                Movie.id == movie_id).first()
             if movie:
                 if title:
                     movie.name = title
@@ -165,10 +169,11 @@ class SQLiteDataManager(DataManagerInterface):
                 if rating:
                     movie.rating = rating
                 session.commit()
-            session.close()
         except SQLAlchemyError as e:
             print(f"Error updating movie: {e}")
             session.rollback()
+        finally:
+            session.close()
 
     def delete_movie(self, movie_id):
         """
@@ -177,13 +182,18 @@ class SQLiteDataManager(DataManagerInterface):
         Args:
             movie_id (int): ID of the movie to delete.
         """
+        session = self.Session()
         try:
-            session = self.Session()
-            movie = session.query(Movie).filter(Movie.id == movie_id).first()
+            movie = session.query(Movie).filter(
+                Movie.id == movie_id).first()
             if movie:
                 session.delete(movie)
                 session.commit()
-            session.close()
         except SQLAlchemyError as e:
             print(f"Error deleting movie: {e}")
             session.rollback()
+        finally:
+            session.close()
+
+
+Base = Base
