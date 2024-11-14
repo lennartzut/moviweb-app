@@ -47,7 +47,7 @@ header, .main-container {
 }
 
 .btn-danger:hover {
-    background-color: #e65c53;
+    background-color: #ec971f;
 }
 
 .btn-warning {
@@ -106,6 +106,7 @@ header, .main-container {
     overflow: hidden;
     position: relative;
     background-color: transparent;
+    cursor: pointer;
 }
 
 .card:hover {
@@ -150,6 +151,10 @@ header, .main-container {
     opacity: 1;
 }
 
+.card-info.showing-plot .card-info-buttons {
+    display: none; /* Hide update/delete buttons when showing plot */
+}
+
 .card-title {
     font-size: 1.1rem;
     font-weight: 600;
@@ -166,6 +171,7 @@ header, .main-container {
     margin-bottom: 1rem;
 }
 
+/* Action buttons for update and delete are only visible during info view */
 .card-info-buttons {
     display: flex;
     justify-content: space-between;
@@ -177,6 +183,39 @@ header, .main-container {
 .card-info-buttons button {
     flex: 1;
     margin: 5px;
+}
+
+/* Plot text is always shown in full and scrolls smoothly */
+.card-plot-text {
+    font-size: calc(0.8rem + 0.20vw); /* Smaller font size */
+    line-height: 1.3em;
+    width: 90%; /* Reduced width to decrease padding on the sides */
+    max-height: 100%;
+    overflow: hidden;
+    word-wrap: break-word;
+    text-align: center;
+    display: block;
+    animation: crawl 15s linear infinite;
+    transform-origin: bottom;
+    transform: translateX(-50%) translateY(100%);
+    left: 50%;
+    position: absolute; /* To properly position the crawling text */
+    text-shadow: 0 0 5px #000000;
+    color: #ffffcc;
+}
+
+/* Animation for crawling text effect */
+@keyframes crawl {
+    0% {
+        transform: translateX(-50%) translateY(100%);
+    }
+    100% {
+        transform: translateX(-50%) translateY(-100%);
+    }
+}
+
+.d-none {
+    display: none !important;
 }
 
 /* Row styling */

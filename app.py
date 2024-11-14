@@ -1,5 +1,5 @@
 import os
-from flask import Flask, flash, render_template, request, \
+from flask import Flask, jsonify, flash, render_template, request, \
     redirect, url_for
 from sqlalchemy.orm import joinedload
 from api import make_api_request
@@ -279,6 +279,28 @@ def confirm_add_movie(user_id):
         return redirect(url_for('user_movies', user_id=user_id))
     finally:
         session.close()
+
+
+@app.route('/get_movie_plot/<imdb_id>', methods=['GET'])
+def get_movie_plot(imdb_id):
+    """
+    Fetch and return the plot of a movie from OMDb API.
+
+    Args:
+        imdb_id (str): IMDb ID of the movie.
+
+    Returns:
+        JSON: Plot of the movie.
+    """
+    try:
+        movie_data = make_api_request(imdb_id, by_id=True)
+        if movie_data and movie_data.get("Response") == "True":
+            plot = movie_data.get("Plot", "Plot not available.")
+            return jsonify({'plot': plot})
+        else:
+            return jsonify({'plot': "Plot not available."})
+    except Exception as e:
+        return jsonify({'plot': "An error occurred while fetching the plot."})
 
 
 @app.route('/users/<int:user_id>/update_movie/<int:movie_id>',

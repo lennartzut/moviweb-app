@@ -24,7 +24,7 @@ def make_api_request(query, by_id=False):
 
     # Adjust the URL based on whether we are searching by title or IMDb ID
     if by_id:
-        api_url = f"http://www.omdbapi.com/?apikey={API_KEY}&i={query}"
+        api_url = f"http://www.omdbapi.com/?apikey={API_KEY}&i={query}&plot=short"
     else:
         api_url = f"http://www.omdbapi.com/?apikey={API_KEY}&s={query}"
 

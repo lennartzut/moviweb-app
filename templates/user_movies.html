@@ -11,7 +11,7 @@
 
 <body>
     <div class="container mt-3" style="max-width: 1200px;">
-        <h2 class="text-center text-light mb-3">Movies Collection of {{ user.name }}</h2>
+        <h2 class="text-center text-light mb-3">Movie Collection of {{ user.name }}</h2>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -31,7 +31,6 @@
         <div class="sorting-and-actions d-flex justify-content-center mb-4">
             <button type="button" class="btn btn-primary action-button" data-toggle="modal" data-target="#addMovieModal">Add Movie</button>
 
-            <!-- Switched Search and Sorting -->
             <form class="form-inline action-button" method="get" action="{{ url_for('user_movies', user_id=user.id) }}">
                 <input class="form-control" type="search"
                        placeholder="Search Collection"
@@ -57,17 +56,22 @@
         <div class="row justify-content-center">
             {% for movie in movies %}
             <div class="col-md-2 mb-4">
-                <div class="card movie-card">
+                <div class="card movie-card" data-imdb-id="{{ movie.imdb_id }}" data-title="{{ movie.name }}" data-director="{{ movie.director }}" data-year="{{ movie.year }}" data-rating="{{ movie.rating }}">
                     <div class="card-img-container">
                         <img src="http://img.omdbapi.com/?apikey={{ api_key }}&i={{ movie.imdb_id }}" class="card-img-top" alt="{{ movie.name }} Poster">
                     </div>
                     <div class="card-info p-3">
-                        <h5 class="card-title">{{ movie.name }}</h5>
-                        <p class="card-text">Directed by {{ movie.director }}<br> {{ movie.year }}<br></p>
-                        <p class="card-rating">Rated {{ movie.rating }}</p>
-                        <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#updateMovieModal-{{ movie.id }}">Update</button>
-                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteMovieModal-{{ movie.id }}">Delete</button>
+                        <div class="card-info-text">
+                            <h5 class="card-title">{{ movie.name }}</h5>
+                            <p class="card-text">Directed by {{ movie.director }}<br> {{ movie.year }}<br></p>
+                            <p class="card-rating">Rated {{ movie.rating }}</p>
+                            <div class="d-flex justify-content-between mt-2 action-buttons">
+                                <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#updateMovieModal-{{ movie.id }}">Update</button>
+                                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteMovieModal-{{ movie.id }}">Delete</button>
+                            </div>
+                        </div>
+                        <div class="card-plot-text d-none">
+                            <p class="card-plot"></p>
                         </div>
                     </div>
                 </div>
@@ -96,6 +100,54 @@
 
                 // Ensure the user movies page is reloaded properly
                 window.location.href = '{{ url_for("user_movies", user_id=user.id) }}';
+            });
+
+            // Handle the click event on movie cards to toggle between movie info and plot
+            $('.movie-card').on('click', function() {
+                let imdbId = $(this).data('imdb-id');
+                let cardInfo = $(this).find('.card-info');
+
+                if ($(this).hasClass('showing-plot')) {
+                    // Show original movie info
+                    $(this).removeClass('showing-plot');
+                    cardInfo.find('.card-plot-text').addClass('d-none');
+                    cardInfo.find('.card-info-text').removeClass('d-none');
+                    cardInfo.find('.action-buttons').removeClass('d-none');
+                } else {
+                    // Fetch plot information and show plot
+                    let apiUrl = `http://www.omdbapi.com/?apikey={{ api_key }}&i=${imdbId}&plot=short`;
+
+                    $.getJSON(apiUrl, function(data) {
+                        if (data.Response === "True") {
+                            cardInfo.find('.card-plot').text(data.Plot);
+                            cardInfo.find('.card-info-text').addClass('d-none');
+                            cardInfo.find('.card-plot-text').removeClass('d-none');
+                            cardInfo.find('.action-buttons').addClass('d-none');
+                        } else {
+                            cardInfo.find('.card-plot').text('Failed to load plot. Please try again.');
+                        }
+                    }).fail(function() {
+                        cardInfo.find('.card-plot').text('Failed to load plot. Please try again.');
+                    });
+
+                    $(this).addClass('showing-plot');
+                }
+            });
+
+            // Resetting back to info when mouse enters
+            $('.movie-card').on('mouseenter', function() {
+                if (!$(this).hasClass('showing-plot')) {
+                    $(this).find('.card-info-text').removeClass('d-none');
+                    $(this).find('.card-plot-text').addClass('d-none');
+                    $(this).find('.action-buttons').removeClass('d-none');
+                }
+            });
+
+            $('.movie-card').on('mouseleave', function() {
+                if ($(this).hasClass('showing-plot')) {
+                    // When mouse leaves, make sure the plot is reset so that it can properly display info on next entry
+                    $(this).removeClass('showing-plot');
+                }
             });
         });
 
