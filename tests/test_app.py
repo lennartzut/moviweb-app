@@ -65,9 +65,8 @@ def test_add_user(client):
         follow_redirects=True
     )
     assert response.status_code == 200
-    assert "User 'John Doe' added successfully." in extract_flash_message(
-        response
-    )
+    assert ("User 'John Doe' added successfully." in
+            extract_flash_message(response))
 
     response = client.post(
         '/add_user',
@@ -85,8 +84,10 @@ def test_add_user(client):
         follow_redirects=True
     )
     assert response.status_code == 200
-    assert "User 'John Doe' already exists. Please choose a different name."\
+    assert ("User 'John Doe' already exists. Please choose a "
+            "different name.") \
            in extract_flash_message(response)
+
 
 def test_delete_user(client):
     """
@@ -140,7 +141,8 @@ def test_add_movie(client):
     session.close()
 
     response = client.get(
-        url_for('add_movie_form', user_id=user_id) + '?title=The Godfather'
+        url_for('add_movie_form',
+                user_id=user_id) + '?title=The Godfather'
     )
     assert response.status_code == 200
 
@@ -150,9 +152,10 @@ def test_add_movie(client):
         follow_redirects=True
     )
     assert response.status_code == 200
-    assert "Movies 'The Godfather' added successfully." in extract_flash_message(
+    assert ("Movies 'The Godfather' added successfully." in
+            extract_flash_message(
         response
-    )
+    ))
 
 
 def test_update_movie(client):
@@ -189,9 +192,10 @@ def test_update_movie(client):
         follow_redirects=True
     )
     assert response.status_code == 200
-    assert "Movie 'The Godfather Updated' updated successfully." in extract_flash_message(
+    assert ("Movie 'The Godfather Updated' updated successfully."
+            in extract_flash_message(
         response
-    )
+    ))
 
 
 def test_delete_movie(client):
