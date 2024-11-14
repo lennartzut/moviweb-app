@@ -44,18 +44,41 @@ header, .main-container {
 
 .btn-danger {
     background-color: #ff6f61;
+    color: #ffffff;
+    border: none;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, transform 0.2s ease;
 }
 
 .btn-danger:hover {
-    background-color: #ec971f;
+    background-color: #e55448;
+    color: #000000;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 111, 97, 0.4);
 }
 
+.btn-danger:active {
+    transform: translateY(1px);
+    box-shadow: 0 3px 10px rgba(255, 111, 97, 0.4);
+}
+
+/* Warning Button */
 .btn-warning {
     background-color: #f0ad4e;
+    color: #ffffff;
+    border: none;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, transform 0.2s ease;
 }
 
 .btn-warning:hover {
     background-color: #ec971f;
+    color: #000000;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(240, 173, 78, 0.4);
+}
+
+.btn-warning:active {
+    transform: translateY(1px);
+    box-shadow: 0 3px 10px rgba(240, 173, 78, 0.4);
 }
 
 .action-button {
@@ -152,7 +175,7 @@ header, .main-container {
 }
 
 .card-info.showing-plot .card-info-buttons {
-    display: none; /* Hide update/delete buttons when showing plot */
+    display: none;
 }
 
 .card-title {
@@ -171,7 +194,6 @@ header, .main-container {
     margin-bottom: 1rem;
 }
 
-/* Action buttons for update and delete are only visible during info view */
 .card-info-buttons {
     display: flex;
     justify-content: space-between;
@@ -185,11 +207,10 @@ header, .main-container {
     margin: 5px;
 }
 
-/* Plot text is always shown in full and scrolls smoothly */
 .card-plot-text {
-    font-size: calc(0.8rem + 0.20vw); /* Smaller font size */
+    font-size: calc(0.8rem + 0.20vw);
     line-height: 1.3em;
-    width: 90%; /* Reduced width to decrease padding on the sides */
+    width: 90%;
     max-height: 100%;
     overflow: hidden;
     word-wrap: break-word;
@@ -199,7 +220,7 @@ header, .main-container {
     transform-origin: bottom;
     transform: translateX(-50%) translateY(100%);
     left: 50%;
-    position: absolute; /* To properly position the crawling text */
+    position: absolute;
     text-shadow: 0 0 5px #000000;
     color: #ffffcc;
 }
