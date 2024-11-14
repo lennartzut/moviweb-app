@@ -88,33 +88,26 @@
 
     <script>
         $(document).ready(function() {
-            // Show the modal if search results exist or if there's a reason to keep the modal open
             {% if keep_modal_open %}
             $('#addMovieModal').modal('show');
             {% endif %}
 
-            // Clear the search field and previous results when closing the modal
             $('#addMovieModal').on('hidden.bs.modal', function () {
                 $('#addMovieModal input[name="title"]').val('');
                 $('#addMovieModal .search-results-container').html('');
-
-                // Ensure the user movies page is reloaded properly
                 window.location.href = '{{ url_for("user_movies", user_id=user.id) }}';
             });
 
-            // Handle the click event on movie cards to toggle between movie info and plot
             $('.movie-card').on('click', function() {
                 let imdbId = $(this).data('imdb-id');
                 let cardInfo = $(this).find('.card-info');
 
                 if ($(this).hasClass('showing-plot')) {
-                    // Show original movie info
                     $(this).removeClass('showing-plot');
                     cardInfo.find('.card-plot-text').addClass('d-none');
                     cardInfo.find('.card-info-text').removeClass('d-none');
                     cardInfo.find('.action-buttons').removeClass('d-none');
                 } else {
-                    // Fetch plot information and show plot
                     let apiUrl = `http://www.omdbapi.com/?apikey={{ api_key }}&i=${imdbId}&plot=short`;
 
                     $.getJSON(apiUrl, function(data) {
@@ -134,7 +127,6 @@
                 }
             });
 
-            // Resetting back to info when mouse enters
             $('.movie-card').on('mouseenter', function() {
                 if (!$(this).hasClass('showing-plot')) {
                     $(this).find('.card-info-text').removeClass('d-none');
@@ -145,7 +137,6 @@
 
             $('.movie-card').on('mouseleave', function() {
                 if ($(this).hasClass('showing-plot')) {
-                    // When mouse leaves, make sure the plot is reset so that it can properly display info on next entry
                     $(this).removeClass('showing-plot');
                 }
             });
@@ -154,8 +145,6 @@
         function sortMovies() {
             let sortOption = document.getElementById('sortOptions').value;
             let searchQuery = document.querySelector('input[name="search"]').value;
-
-            // Redirect to user_movies with both sorting and search query parameters
             window.location.href = `{{ url_for('user_movies', user_id=user.id) }}?sort=${sortOption}&search=${searchQuery}`;
         }
 

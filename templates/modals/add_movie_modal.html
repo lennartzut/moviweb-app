@@ -7,8 +7,6 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-
-            <!-- Separate Search Form -->
             <form id="search-movie-form" method="GET" action="{{ url_for('add_movie_form', user_id=user.id) }}">
                 <div class="modal-body">
                     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -25,7 +23,6 @@
                     </div>
                     {% endif %}
                     {% endwith %}
-
                     <div class="form-group text-left">
                         <input type="text" class="form-control" id="search-title" name="title" placeholder="Enter movie title..." value="{{ search_query if search_query }}">
                     </div>
@@ -34,8 +31,6 @@
                     <button type="submit" class="btn btn-primary">Search Movie</button>
                 </div>
             </form>
-
-            <!-- Movie Selection and Adding Form -->
             {% if search_results %}
             <form id="confirm-add-form" method="POST" action="{{ url_for('confirm_add_movie', user_id=user.id) }}">
                 <div class="modal-body">

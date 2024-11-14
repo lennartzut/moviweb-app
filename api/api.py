@@ -6,6 +6,7 @@ load_dotenv()
 
 API_KEY = os.getenv('API_KEY')
 
+
 def make_api_request(query, by_id=False):
     """
     Request movie data from OMDb API based on title or IMDb ID.
@@ -22,21 +23,20 @@ def make_api_request(query, by_id=False):
         print("Error: API_KEY is not set. Please check your .env file.")
         return None
 
-    # Adjust the URL based on whether we are searching by title or IMDb ID
     if by_id:
-        api_url = f"http://www.omdbapi.com/?apikey={API_KEY}&i={query}&plot=short"
+        api_url = (f"http://www.omdbapi.com/?apikey={API_KEY}&"
+                   f"i={query}&plot=short")
     else:
-        api_url = f"http://www.omdbapi.com/?apikey={API_KEY}&s={query}"
+        api_url = (f"http://www.omdbapi.com/?apikey={API_KEY}&"
+                   f"s={query}")
 
     try:
         response = requests.get(api_url, timeout=5)
         if response.status_code == requests.codes.ok:
             data = response.json()
             if data.get("Response") == "True":
-                # If by_id is True, return the full movie data directly
                 if by_id:
                     return data
-                # Otherwise, return the list of search results
                 return data.get("Search", [])
             else:
                 print("No results found:", data.get("Error"))
@@ -51,4 +51,5 @@ def make_api_request(query, by_id=False):
               "Check your internet connection.")
     except requests.exceptions.RequestException as e:
         print("Error:", e)
+
     return None
